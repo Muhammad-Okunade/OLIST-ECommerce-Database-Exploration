@@ -1,4 +1,3 @@
-# Saved 21st Nov, 10.01 pm
 
 # Period
 select  cast(min(order_purchase_timestamp) as date) as Date_first_order, 
@@ -65,20 +64,6 @@ from OLIST.orders
 group by Month_of_year 
 order by Month_of_year
 
-# Total Number of Orders Each Day by Category
-
-# Total Price of Orders Each Month by Category
-
-/* Returning/Repeat Customers vs New Customers
-select (avg
-    (case when Number_of_orders = 1 then 1
-    else 0
-    end))*100 as Percentage_of_Repeat_Customers
-from 
-    (select count(*) as Number_of_orders, customer_id
-    from OLIST.orders
-    group by customer_id) */
- 
 # Most Popular Product Category
 select Product_category, count (*) as Number_of_orders, round(100*(count(*)/(select count(*) from OLIST.orders)),2) as Percentage_of_orders 
 from OLIST.order_items as oi
@@ -104,17 +89,3 @@ from
 group by category 
 order by Average_price desc 
 
-# Average Order Price in Period of Period
-# Average Order Price by State
-# Average Order Price by City
-# Average Delivery Time by State
-# Average Delivery Time by City
-# Biggest Customer by Number of Orders by City (Target for Promotions)
-# Biggest Customer by Price of Orders by Categories (Target for Promotions) 
-# Lowest Rated Sellers by Product Category (Average Rating) 
-# Higest Rated Sellers Product Category (Average Rating) 
-# Prefered Payment Type by Average Price
-# Number of Sellers in Each City (Recruit More Sellers in Areas with Few Sellers) 
-# Cities/ States with decreasing sales over period (Average Increase) 
-# Most Items Bought from Other Cities
-# Day of the weeks/ time of day/ month of the year (use extact)
