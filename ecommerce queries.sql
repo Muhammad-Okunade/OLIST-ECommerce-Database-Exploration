@@ -190,3 +190,56 @@ select count(*) as Number_of_customers, customer_state, (select count(*) from OL
 from OLIST.customers
 group by customer_state
 order by Number_of_customers desc
+
+
+ # Cities/ States with decreasing sales over period (Average Increase between 4 months and 5 months ago) 
+-- Revenue from most states was less than the previous month
+select round(100*(Total_c_month - Total_p_month)/ Total_p_month, 2) as Percentage_increase_from_previous_month, C_month.State
+from
+    (select round(sum(oi.price),2) as Total_c_month, c.customer_state as State 
+    from OLIST.orders as o
+        left join OLIST.customers as c
+        on o.customer_id = c.customer_id
+        left join OLIST.order_items as oi
+        on o.order_id = oi.order_id
+    where date_trunc(order_purchase_timestamp, month) = (select date_trunc (date_sub (max(order_purchase_timestamp), interval 120 day), month) from OLIST.orders)
+    group by State) as C_month
+join
+    (select round(sum(price),2) as Total_p_month, c.customer_state as State
+    from OLIST.orders as o
+        left join OLIST.customers as c
+        on o.customer_id = c.customer_id
+        left join OLIST.order_items as oi
+        on o.order_id = oi.order_id
+    where date_trunc(order_purchase_timestamp, month) = (select date_trunc (date_sub (max(order_purchase_timestamp), interval 150 day), month) from OLIST.orders)
+    group by State) as P_month
+on C_month.State = P_month.State
+order by Percentage_increase_from_previous_month 
+
+# Most Items Bought from Other Cities
+-- More sellers need to be recruited in other states apart from Sao Paolo, this could help in reducing delivery times
+select Number_of_items_bought_from_other_states, a.customer_state, (Number_of_items_bought_from_other_states/ Number_of_orders_from_states) * 100 as Percentage_of_orders_from_state
+from    
+    (select count(*) as Number_of_items_bought_from_other_states, customer_state
+    from OLIST.orders as o
+    left join OLIST.customers as c
+    on o.customer_id = c.customer_id
+    left join OLIST.order_items as oi
+    on o.order_id = oi.order_id
+    left join OLIST.sellers as s
+    on oi.seller_id = s.seller_id
+    where customer_state <> seller_state
+    group by customer_state) as a
+join
+    (select count(*) as Number_of_orders_from_states, customer_state
+     from OLIST.orders as o
+    left join OLIST.customers as c
+    on o.customer_id = c.customer_id
+    left join OLIST.order_items as oi
+    on o.order_id = oi.order_id
+    left join OLIST.sellers as s
+    on oi.seller_id = s.seller_id
+    group by customer_state) as b
+on a.customer_state = b.customer_state
+order by Percentage_of_orders_from_state
+
