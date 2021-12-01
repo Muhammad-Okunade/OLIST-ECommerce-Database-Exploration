@@ -135,6 +135,24 @@ from
 group by category 
 order by Average_price desc 
 
+# Top Performing Categories by Period (Run promotions/ increase prices by category for months were there are spikes in demands for some product categories)
+-- Computers and accessories are usually high in demand at the start of the year, especially in February when they account for the most orders.
+with cte as (select count(*) as Number_of_orders, extract(month from order_purchase_timestamp) as Month, string_field_1 as Product_category
+    from OLIST.orders as o 
+        left join OLIST.order_items as oi
+        on o.order_id = oi.order_id
+        left join OLIST.products as op
+        on oi.product_id = op.product_id 
+        left join OLIST.product_category as pc 
+        on op.product_category_name = pc.string_field_0
+     group by Month, Product_category)
+
+select * from
+    (select Number_of_orders, Month, Product_category, rank() over(partition by Month order by Number_of_orders desc) as Ranks 
+    from cte)
+where Ranks in (1,2,3)
+order by Month, Ranks
+
 # Average Order Price by Customer State
 -- Customers in PB spend the most on orders, more sales should be made to this state.
 select round(avg(price),2) as Average_price, State
